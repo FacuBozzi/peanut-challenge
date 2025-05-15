@@ -14,14 +14,6 @@ const knerdFilled = localFont({
   display: "swap",
 });
 
-const knerdOutline = localFont({
-  src: "../app/fonts/knerd-outline.ttf",
-  weight: "700",
-  style: "normal",
-  variable: "--knerd-outline",
-  display: "swap",
-});
-
 const montserrat = Montserrat({ subsets: ["latin"], weight: ["500", "700"] });
 
 const statusStyle: Record<PaymentLink["status"], string> = {

@@ -1,16 +1,14 @@
-import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/jest-globals';
 import '@testing-library/jest-dom';
 import { GET } from '@/app/api/payment/[id]/route';
-import { NextResponse } from 'next/server';
-
+import { NextRequest } from 'next/server';
 describe('Payment API', () => {
   it('returns the correct payment link for a valid ID', async () => {
     // Mock the params object that Next.js would pass to the handler
     const params = { id: 'abc123' };
     
     // Call the GET handler directly
-    const response = await GET({} as Request, { params });
+    const response = await GET(new NextRequest(new Request('http://localhost')), { params });
     
     // Parse the response JSON
     const data = await response.json();
@@ -29,7 +27,7 @@ describe('Payment API', () => {
     const params = { id: 'invalid-id' };
     
     // Call the GET handler directly
-    const response = await GET({} as Request, { params });
+    const response = await GET(new NextRequest(new Request('http://localhost')), { params });
     
     // Check the status code
     expect(response.status).toBe(404);

@@ -1,15 +1,20 @@
+'use client';
+
 import PaymentCard from '@/components/PaymentCard';
 import type { PaymentLink } from '@/types/payment';
+import { use } from 'react';
 
 export default function RequestPage({
   params,
 }: {
-  params: { username: string; amount: string };
+  params: Promise<{ username: string; amount: string }>;
 }) {
+  const { username, amount } = use(params);
+  
   const link: PaymentLink = {
     type: 'request',
-    username: params.username,
-    amount: Number(params.amount),
+    username: username,
+    amount: Number(amount),
     status: 'unclaimed',
   };
 
