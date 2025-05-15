@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { PaymentLink } from '@/types/payment';
 
 const db: Record<string, PaymentLink> = {
-  abc123: { type: 'send', amount: 42,   username: 'peanut', status: 'unclaimed' },
+  abc123: { type: 'send', amount: 6969,   username: 'peanut', status: 'unclaimed' },
   xyz789: { type: 'send', amount: 9.99, username: 'kkonrad', status: 'claimed'  },
   foo456: { type: 'send', amount: 77,   username: 'alice',  status: 'expired'  },
 };
