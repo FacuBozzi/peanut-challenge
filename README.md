@@ -1,4 +1,3 @@
-````markdown
 # Peanut Payment Links – Take-Home Submission  
 _Facundo Bozzi – May 2025_
 
