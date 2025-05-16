@@ -5,9 +5,11 @@ import type { NextRequest } from "next/server";
 export const runtime = "edge";
 
 // You can swap this out for next/font/local later
-const interSemiBold = fetch(
-  new URL("../../../public/Inter-SemiBold.ttf", import.meta.url)
+const knerdFilled = fetch(
+  new URL("../../fonts/knerd-filled.ttf", import.meta.url)
 ).then((res) => res.arrayBuffer());
+
+console.log("interSemiBold", knerdFilled);
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -73,8 +75,8 @@ export async function GET(req: NextRequest) {
       height: 630,
       fonts: [
         {
-          name: "Inter",
-          data: await interSemiBold,
+          name: "Knerd",
+          data: await knerdFilled,
           style: "normal",
         },
       ],
