@@ -6,6 +6,8 @@ import { useSearchParams } from 'next/navigation';
 import type { LinkStatus } from '@/types/payment';
 import { use } from 'react';
 import UnexistingLink from '@/components/UnexistingLink';
+import type { Metadata } from 'next';
+import { buildOgMetadata } from '@/lib/buildOgMetadata';
 
 export default function ClaimPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -20,4 +22,20 @@ export default function ClaimPage({ params }: { params: Promise<{ id: string }> 
   const link  = demo ? { ...data, status: demo } : data;
 
   return <PaymentCard link={link} />;
+}
+
+const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+
+export async function generateMetadata(
+  { params }: { params: { id: string } }
+): Promise<Metadata> {
+  const res  = await fetch(`${SITE}/api/payment/${params.id}`).catch(() => null);
+  const link = res && res.ok ? await res.json() : null;
+
+  return buildOgMetadata({
+    siteUrl: SITE,
+    type: link ? 'send' : 'generic',
+    username: link?.username,
+    amount:   link?.amount,
+  });
 }

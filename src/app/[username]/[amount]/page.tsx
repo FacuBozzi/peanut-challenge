@@ -1,7 +1,9 @@
 'use client';
 
 import PaymentCard from '@/components/PaymentCard';
+import { buildOgMetadata } from '@/lib/buildOgMetadata';
 import type { PaymentLink } from '@/types/payment';
+import type { Metadata } from 'next';
 import { use } from 'react';
 
 export default function RequestPage({
@@ -19,4 +21,17 @@ export default function RequestPage({
   };
 
   return <PaymentCard link={link} />;
+}
+
+const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+
+export function generateMetadata(
+  { params }: { params: { username: string; amount: string } }
+): Metadata {
+  return buildOgMetadata({
+    siteUrl: SITE,
+    type: 'request',
+    username: params.username,
+    amount: Number(params.amount),
+  });
 }
