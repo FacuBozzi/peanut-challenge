@@ -2,17 +2,8 @@
 
 import { twMerge } from "tailwind-merge";
 import type { PaymentLink } from "@/types/payment";
-import localFont from "next/font/local";
 import Image from "next/image";
 import { Montserrat } from "next/font/google";
-
-const knerdFilled = localFont({
-  src: "../app/fonts/knerd-filled.ttf",
-  weight: "400",
-  style: "normal",
-  variable: "--knerd-filled",
-  display: "swap",
-});
 
 const montserrat = Montserrat({ subsets: ["latin"], weight: ["500", "700"] });
 
@@ -66,9 +57,8 @@ export default function PaymentCard({ link }: { link: PaymentLink }) {
         <p
           className={`${twMerge(
             "text-white",
-            knerdFilled.className
           )} relative inline-block [-webkit-text-stroke:3px_black]`}
-          style={{ fontSize: "140px" }}
+          style={{ fontSize: "140px", fontFamily: "'Knerd Filled', sans-serif" }}
         >
           <span
             aria-hidden="true"
