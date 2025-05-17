@@ -5,9 +5,10 @@ import type { Metadata } from 'next';
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
 export async function generateMetadata(
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<Metadata> {
-  const res  = await fetch(`${SITE}/api/payment/${params.id}`).catch(() => null);
+  const { id } = await params;
+  const res  = await fetch(`${SITE}/api/payment/${id}`).catch(() => null);
   const link = res && res.ok ? await res.json() : null;
 
   return buildOgMetadata({
@@ -18,14 +19,16 @@ export async function generateMetadata(
   });
 }
 
-export default function ClaimPage({
+export default async function ClaimPage({
   params,
   searchParams,
 }: {
-  params: { id: string };
-  searchParams: { demo?: string };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ demo?: string }>;
 }) {
+  const { id } = await params;
+  const { demo } = await searchParams;
   return (
-    <ClaimClient id={params.id} demo={searchParams.demo} />
+    <ClaimClient id={id} demo={demo} />
   );
 }

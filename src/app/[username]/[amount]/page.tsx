@@ -4,26 +4,36 @@ import type { Metadata } from 'next';
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
-export async function generateMetadata(
-  { params }: { params: { id: string } }
-): Promise<Metadata> {
-  const res  = await fetch(`${SITE}/api/payment/${params.id}`).catch(() => null);
-  const link = res && res.ok ? await res.json() : null;
+type RequestParams = Promise<{
+  username: string;
+  amount: string;
+}>;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: RequestParams;
+}): Promise<Metadata> {
+  const { username, amount } = await params;
 
   return buildOgMetadata({
     siteUrl: SITE,
-    type: link ? 'send' : 'generic',
-    username: link?.username,
-    amount:   link?.amount,
+    type: 'request', // Explicit type for request links
+    username: username,
+    amount: Number(amount),
   });
 }
 
-export default function RequestPage({
+export default async function RequestPage({
   params,
 }: {
-  params: { username: string, amount: string  };
+  params: RequestParams;
 }) {
+  const { username, amount } = await params;
   return (
-    <RequestPageClient username={params.username} amount={params.amount} />
+    <RequestPageClient 
+      username={username} 
+      amount={amount} 
+    />
   );
 }
