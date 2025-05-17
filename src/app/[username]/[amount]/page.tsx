@@ -1,37 +1,29 @@
-'use client';
-
-import PaymentCard from '@/components/PaymentCard';
 import { buildOgMetadata } from '@/lib/buildOgMetadata';
-import type { PaymentLink } from '@/types/payment';
+import RequestPageClient from './RequestPageClient';
 import type { Metadata } from 'next';
-import { use } from 'react';
+
+const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+
+export async function generateMetadata(
+  { params }: { params: { id: string } }
+): Promise<Metadata> {
+  const res  = await fetch(`${SITE}/api/payment/${params.id}`).catch(() => null);
+  const link = res && res.ok ? await res.json() : null;
+
+  return buildOgMetadata({
+    siteUrl: SITE,
+    type: link ? 'send' : 'generic',
+    username: link?.username,
+    amount:   link?.amount,
+  });
+}
 
 export default function RequestPage({
   params,
 }: {
-  params: Promise<{ username: string; amount: string }>;
+  params: { username: string, amount: string  };
 }) {
-  const { username, amount } = use(params);
-  
-  const link: PaymentLink = {
-    type: 'request',
-    username: username,
-    amount: Number(amount),
-    status: 'unclaimed',
-  };
-
-  return <PaymentCard link={link} />;
-}
-
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-
-export function generateMetadata(
-  { params }: { params: { username: string; amount: string } }
-): Metadata {
-  return buildOgMetadata({
-    siteUrl: SITE,
-    type: 'request',
-    username: params.username,
-    amount: Number(params.amount),
-  });
+  return (
+    <RequestPageClient username={params.username} amount={params.amount} />
+  );
 }

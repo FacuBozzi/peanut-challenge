@@ -1,50 +1,154 @@
-import type { PaymentLink } from '@/types/payment';
-import { twMerge } from 'tailwind-merge';
+import type { PaymentLink } from "@/types/payment";
 
-/* <img> instead of next/image since this is a server component */
-const PeanutLogo = () => (
-  <div className="w-40 flex items-center">
-    <img src="https://img.notionusercontent.com/s3/prod-files-secure%2Fb08e0384-3fae-465c-8ce5-c02ee949214b%2F45d5f652-1f57-4372-bb0b-2059bddc0ab6%2FGroup_88.svg/size/?exp=1747509308&sig=pbF6OFSrI89QFBaIHJ9OpCZ1aQXCorH4XUQKJbbuBAc&id=1f383811-7579-801f-a74d-dadccb8fe9dd&table=block"
-         width={36} height={36} alt="Peanut icon" />
-    <img src="https://img.notionusercontent.com/s3/prod-files-secure%2Fb08e0384-3fae-465c-8ce5-c02ee949214b%2F49b10fc1-1813-4f5e-96e1-1d4822c8e540%2FGroup_91.svg/size/?exp=1747509326&sig=Yv6IwmY4Dj1ymd7A_j4aVrff36rR4YMjUxIo2hga2LE&id=1f383811-7579-804d-bb7f-dabc1b42f373&table=block"
-         width={70} height={18} alt="Peanut logo" className="ml-2" />
-  </div>
-);
+function usernamePxWidth(name: string) {
+  const charPx = 0.6 * 80; // ≈48 px per glyph
+  return Math.round(name.length * charPx) + 40; // +40 padding
+}
 
-const statusStyle: Record<PaymentLink['status'], string> = {
-  loading:    'bg-gray-200 text-gray-500',
-  unclaimed:  'bg-[#fe91e6] text-black',
-  claimed:    'bg-green-100 text-green-800',
-  expired:    'bg-gray-100 text-gray-600',
-  cancelled:  'bg-red-100 text-red-800',
-};
+export function PaymentCardOG({
+  link,
+  iconSrc,
+  logoSrc,
+}: {
+  link: PaymentLink;
+  iconSrc: string;
+  logoSrc: string;
+}) {
+  /* ----- palette ----- */
+  const pink = "#fe91e6";
+  const scribbleSrc =
+    "https://img.notionusercontent.com/s3/prod-files-secure%2Fb08e0384-3fae-465c-8ce5-c02ee949214b%2Fa31955a0-ca83-45e5-a7dc-c97538770602%2FVector_(1).svg/size/?exp=1747525540&sig=SIwQkLtIyYVghKSBBpc7XQSga_fKqRoAuVTOH1TZxag&id=1f383811-7579-80cb-b98d-e4ac52963610&table=block";
+  const scribbleWidth = usernamePxWidth(link.username);
 
-export function PaymentCardOG({ link }: { link: PaymentLink }) {
-  const frame = 'flex justify-center rounded-2xl bg-white p-4';
-  const inner = twMerge(
-    'relative w-[450px] flex flex-col items-center space-y-4 border-[3px] border-black p-6',
-    statusStyle[link.status]
-  );
-
+  /* ----- outer white frame ----- */
   return (
-    <div className={frame}>
-      <div className={inner}>
-        <PeanutLogo />
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "center",
+        backgroundColor: "#ffffff",
+        borderRadius: 24, // Tailwind rounded-2xl
+        padding: 16,
+        width: 1200,
+        height: 630,
+      }}
+    >
+      {/* inner coloured card ---------------------------------------- */}
+      <div
+        style={{
+          position: "relative",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 16,
+          width: 1000,
+          border: "3px solid #000",
+          backgroundColor: pink,
+          padding: 48,
+          color: "#000",
+        }}
+      >
+        {/*  logo top-left  */}
+        <div
+          style={{
+            position: "absolute",
+            top: 24,
+            left: 24,
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
+          <img src={iconSrc} width={36} height={36} alt="Peanut icon" />
+          <img src={logoSrc} width={100} height={24} alt="Peanut" />
+        </div>
 
-        <h2 className="text-5xl font-bold font-montserrat">{link.username}</h2>
+        {/*  username  */}
+        <div
+          style={{
+            position: "relative",
+            display: "flex", // ← now it’s explicit flex
+            flexDirection: "column", // stack H2 then IMG
+            alignItems: "center", // center them horizontally
+            marginBottom: 8,
+            width: "100%",
+          }}
+        >
+          {/* 1) the username in flow */}
+          <h2
+            style={{
+              fontFamily: "Montserrat SemiBold",
+              fontWeight: 700,
+              fontSize: 80,
+              margin: 0,
+            }}
+          >
+            {link.username}
+          </h2>
 
-        <p className="text-3xl font-montserrat font-medium">
-          {link.type === 'send' ? 'is sending you' : 'is requesting'}
+          {/* 2) the scribble on top, absolutely positioned */}
+          <img
+            src={scribbleSrc}
+            width={scribbleWidth}
+            height={130}
+            alt=""
+            style={{
+              position: "absolute",
+              top: -20,
+              left: "50%",
+              transform: "translateX(-50%)",
+              pointerEvents: "none",
+            }}
+          />
+        </div>
+        {/*  action text  */}
+        <p
+          style={{
+            fontFamily: "Montserrat Medium",
+            fontWeight: 500,
+            fontSize: 36,
+            margin: 0,
+          }}
+        >
+          {link.type === "send" ? "is sending you" : "is requesting"}
         </p>
 
-        <p className="relative inline-block text-[140px] font-knerd-filled text-white leading-none">
+        {/*  big outlined amount  */}
+        {/* $ amount — white fill first, outline absolute & on top */}
+        <p
+          style={{
+            position: "relative",
+            display: "block", // only flex | block | none | -webkit-box are allowed
+            fontSize: 200, // px
+            lineHeight: 1,
+            margin: 0,
+            marginTop: 30,
+          }}
+        >
+          {/* 1) white fill — stays in normal flow */}
           <span
-            aria-hidden
-            className="absolute top-[3px] left-[3px] text-transparent [-webkit-text-stroke:3px_#000]"
+            style={{
+              fontFamily: "Knerd Filled",
+              color: "#fff",
+            }}
           >
             ${link.amount}
           </span>
-          <span className="relative">${link.amount}</span>
+
+          {/* 2) black outline — absolutely positioned, painted *after* → on top */}
+          <span
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              top: 3, // positive offset → outline shows down-right
+              left: 3,
+              fontFamily: "Knerd Outline",
+              color: "#000",
+              pointerEvents: "none", // just in case
+            }}
+          >
+            ${link.amount}
+          </span>
         </p>
       </div>
     </div>

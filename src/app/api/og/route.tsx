@@ -1,84 +1,86 @@
-import { ImageResponse } from "@vercel/og";
-import type { NextRequest } from "next/server";
+/* app/api/og/route.ts */
+import { ImageResponse } from '@vercel/og';
+import { PaymentCardOG } from '@/og/PaymentCardOG';
+import type { NextRequest } from 'next/server';
+import type { PaymentLink } from '@/types/payment';
 
-// edge function
-export const runtime = "edge";
+export const runtime = 'edge';
 
-// You can swap this out for next/font/local later
+/* ------- preload fonts (Knerd & Montserrat) ------- */
 const knerdFilled = fetch(
-  new URL("../../fonts/knerd-filled.ttf", import.meta.url)
-).then((res) => res.arrayBuffer());
+  `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/fonts/knerd-filled.ttf`
+).then(res => res.arrayBuffer());
 
-console.log("interSemiBold", knerdFilled);
+const knerdOutline = fetch(
+  `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/fonts/knerd-outline.ttf`
+).then(res => res.arrayBuffer());
+
+const montserratMedium = fetch(
+  `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/fonts/montserrat-medium.ttf`
+).then(res => res.arrayBuffer());
+
+const montserratSemibold = fetch(
+  `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/fonts/montserrat-semibold.ttf`
+).then(res => res.arrayBuffer());
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
+  const type = (searchParams.get('type') ?? 'generic') as 'send' | 'request' | 'generic';
+  const username = searchParams.get('username') ?? 'Peanut';
+  const amount   = Number(searchParams.get('amount') ?? 0);
 
-  // collect dynamic bits -> /api/og?username=kkonrad&amount=6969
-  const username = searchParams.get("username");
-  const amount = searchParams.get("amount");
-  const type = searchParams.get("type"); // 'send' | 'request'
-  const fallback = !username || !amount;
-
-  /* fallback */
-  if (fallback) {
+  /* 1. If invalid link -> generic banner */
+  if (type === 'generic') {
     return new ImageResponse(
-      (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100%",
-            height: "100%",
-            backgroundColor: "#f472b6",
-          }}
-        >
-          <h1
-            style={{
-              fontSize: "3.75rem",
-              fontWeight: 700,
-              color: "#ffffff",
-            }}
-          >
-            Peanut Protocol
-          </h1>
-        </div>
-      ),
-      { width: 1200, height: 630 }
+      <div
+        style={{
+          width: 1200,
+          height: 630,
+          backgroundColor: '#fe91e6',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: 64,
+          fontWeight: 700,
+          color: '#fff',
+        }}
+      >
+        Peanut Protocol
+      </div>,
+      {
+        width: 1200,
+        height: 630,
+        fonts: [
+          { name: 'Montserrat', data: await montserratMedium, style: 'normal' },
+        ],
+      }
     );
   }
 
-  /* dynamic image */
+  /* 2. Build link object and render PaymentCardOG */
+  const link: PaymentLink = {
+    type,
+    username,
+    amount,
+    status: 'unclaimed',
+  };
+
+  const site = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+
   return new ImageResponse(
-    (
-      <div
-        tw="flex flex-col items-center justify-center w-full h-full"
-        style={{ backgroundColor: "#ff7ad0" /* peanut pink */ }}
-      >
-        <span tw="absolute top-10 left-12 font-bold text-white text-lg tracking-widest">
-          PEANUT
-        </span>
-
-        <h2 tw="mb-6 text-5xl font-bold text-black">
-          {username}
-          <span tw="block text-2xl font-normal mt-2">
-            {type === "send" ? "is sending you" : "is requesting"}
-          </span>
-        </h2>
-
-        <p tw="text-8xl font-extrabold text-white drop-shadow-lg">${amount}</p>
-      </div>
-    ),
+    <PaymentCardOG
+      link={link}
+      iconSrc={`${site}/peanut-brand/peanut-icon.svg`}
+      logoSrc={`${site}/peanut-brand/peanut-logo.svg`}
+    />,
     {
       width: 1200,
       height: 630,
       fonts: [
-        {
-          name: "Knerd",
-          data: await knerdFilled,
-          style: "normal",
-        },
+        { name: 'Knerd Filled',      data: await knerdFilled,      style: 'normal' },
+        { name: 'Knerd Outline',     data: await knerdOutline, style: 'normal' },
+        { name: 'Montserrat Medium', data: await montserratMedium, style: 'normal' },
+        { name: 'Montserrat SemiBold', data: await montserratSemibold, style: 'normal' },
       ],
     }
   );
